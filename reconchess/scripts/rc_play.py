@@ -286,6 +286,8 @@ def main():
                         help='number of seconds each player has to play the entire game.')
     parser.add_argument('--starting_board', type=str,
                         help='filename to load starting board from (in FEN format)')
+    parser.add_argument('--save_replay', action='store_true',
+                        help='whether to save a replay of the game at the end (default: don\'t save')
     args = parser.parse_args()
 
     bot_name, bot_constructor = load_player(args.bot_path)
@@ -313,11 +315,13 @@ def main():
     print('Game Over!')
     print('Winner: {}!'.format(winner))
 
-    timestamp = datetime.datetime.now().strftime('%Y_%m_%d-%H_%M_%S')
 
-    replay_path = '{}-{}-{}-{}.json'.format(player_names[0], player_names[1], winner, timestamp)
-    print('Saving replay to {}...'.format(replay_path))
-    history.save(replay_path)
+    if args.save_replay:
+        timestamp = datetime.datetime.now().strftime('%Y_%m_%d-%H_%M_%S')
+        replay_path = '{}-{}-{}-{}.json'.format(
+            player_names[0], player_names[1], winner, timestamp)
+        print('Saving replay to {}...'.format(replay_path))
+        history.save(replay_path)
 
 
 if __name__ == '__main__':
