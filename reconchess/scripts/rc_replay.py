@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import pkg_resources
 import argparse
 import contextlib
