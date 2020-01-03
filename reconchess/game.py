@@ -132,9 +132,18 @@ class LocalGame(Game):
     The local implementation of :class:`Game`. Used to run games locally instead of remotely via a server.
     """
 
-    def __init__(self, seconds_per_player: float = 900):
+    def __init__(self, seconds_per_player: float = 900, load_board_from: Optional[str] = None):
         self.turn = chess.WHITE
-        self.board = chess.Board()
+        if load_board_from is None:
+            self.board = chess.Board()
+        else:
+            try:
+                with open(load_board_from, 'r') as f:
+                    fen = f.readline().strip()
+                self.board = chess.Board(fen = fen)
+            except (OSError, ValueError):
+                print('Error loading starting position; using the default instead.')
+                self.board = chess.Board()
 
         self.__game_history = GameHistory()
 

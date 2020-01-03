@@ -284,6 +284,8 @@ def main():
                         help='The color you want to play as.')
     parser.add_argument('--seconds_per_player', default=900, type=float,
                         help='number of seconds each player has to play the entire game.')
+    parser.add_argument('--starting_board', type=str,
+                        help='filename to load starting board from (in FEN format)')
     args = parser.parse_args()
 
     bot_name, bot_constructor = load_player(args.bot_path)
@@ -296,7 +298,7 @@ def main():
         players.reverse()
         player_names.reverse()
 
-    game = LocalGame(args.seconds_per_player)
+    game = LocalGame(args.seconds_per_player, args.starting_board)
 
     try:
         winner_color, win_reason, history = play_local_game(players[0], players[1], game)
