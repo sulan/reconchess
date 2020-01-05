@@ -108,7 +108,7 @@ class ReplayWindow:
     LIGHT_SQUARES = list(chess.SquareSet(chess.BB_LIGHT_SQUARES))
     DARK_SQUARES = list(chess.SquareSet(chess.BB_DARK_SQUARES))
 
-    def __init__(self, history: GameHistory):
+    def __init__(self, history: GameHistory, draw_pieces: str = 'both'):
         self.actions = []
         for turn in history.turns():
             # if history.has_sense(turn):
@@ -134,6 +134,8 @@ class ReplayWindow:
 
         self.board = chess.Board()
         self.action_index = None
+
+        self.draw_pieces = draw_pieces
 
         self.fps = 30
         self.square_size = 80
@@ -288,8 +290,13 @@ class ReplayWindow:
 
             piece = self.board.piece_at(square)
             if piece is not None:
-                image = self.image_by_piece[piece]
-                self.background.blit(image, self.square_rect(square))
+                # Can draw this piece if the opposite color is not the (only)
+                # one to draw. Always true if self.draw_pieces == 'both'.
+                can_draw_piece = (
+                    ['black', 'white'][not piece.color] != self.draw_pieces)
+                if can_draw_piece:
+                    image = self.image_by_piece[piece]
+                    self.background.blit(image, self.square_rect(square))
 
     def draw_sense(self):
         for square, opt_piece in self.actions[self.action_index]['sense_result']:
@@ -300,6 +307,11 @@ class ReplayWindow:
         taken_move = self.actions[self.action_index]['taken_move']
         capture_square = self.actions[self.action_index]['capture_square']
 
+        # Can draw this move if the opposite color is not the (only) one to
+        # draw. Always true if self.draw_pieces == 'both'. Opposite color is
+        # the one whose turn it is (who will make the *next* move).
+        if ['black', 'white'][self.board.turn] == self.draw_pieces:
+            return
         if requested_move is not None and taken_move is None:
             self.draw_highlight(requested_move.from_square, color=(255, 0, 0))
             self.draw_highlight(requested_move.to_square, color=(255, 0, 0))
@@ -335,6 +347,9 @@ class ReplayWindow:
 def main():
     parser = argparse.ArgumentParser(description='Allows you to watch a saved match.')
     parser.add_argument('history_path', help='Path to saved Game History file.')
+    parser.add_argument('--draw_pieces', choices = ['white', 'black', 'both'],
+                        default = 'both',
+                        help = 'Which pieces to draw (default: both)')
     args = parser.parse_args()
 
     if args.history_path.endswith('.pgn'):
@@ -345,7 +360,7 @@ def main():
         print('Game History is empty.')
         quit()
 
-    window = ReplayWindow(history)
+    window = ReplayWindow(history, args.draw_pieces)
 
     while True:
         window.update()
