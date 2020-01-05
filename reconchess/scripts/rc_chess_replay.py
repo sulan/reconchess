@@ -132,6 +132,8 @@ class ReplayWindow:
                     'fen': history.truth_fen_after_move(turn),
                 })
 
+        self.player_names = [history._white_name, history._black_name]
+
         self.board = chess.Board()
         self.action_index = None
 
@@ -168,19 +170,19 @@ class ReplayWindow:
         self.font = pygame.font.SysFont(pygame.font.get_default_font(), 30)
         self.buttons = []
 
-        x, y = self.text_coords_below(chess.C1)
+        x, y = self.text_coords_below(chess.C1, vertical_offset = 0.20)
         self.buttons.append(Button(x, y, self.square_size / 2, self.square_size / 4, self.font, '<<',
                                    onclick=self.go_to_beginning))
 
-        x, y = self.text_coords_below(chess.D1)
+        x, y = self.text_coords_below(chess.D1, vertical_offset = 0.20)
         self.buttons.append(Button(x, y, self.square_size / 2, self.square_size / 4, self.font, '<',
                                    onclick=self.go_backwards))
 
-        x, y = self.text_coords_below(chess.E1)
+        x, y = self.text_coords_below(chess.E1, vertical_offset = 0.20)
         self.buttons.append(Button(x, y, self.square_size / 2, self.square_size / 4, self.font, '>',
                                    onclick=self.go_forwards))
 
-        x, y = self.text_coords_below(chess.F1)
+        x, y = self.text_coords_below(chess.F1, vertical_offset = 0.20)
         self.buttons.append(Button(x, y, self.square_size / 2, self.square_size / 4, self.font, '>>',
                                    onclick=self.go_to_end))
 
@@ -334,6 +336,12 @@ class ReplayWindow:
         text = 'Player: {}'.format(player)
         text_width, text_height = self.font.size(text)
         x, y = self.text_coords_below(chess.A1, vertical_offset=0.66)
+        x, y = (x, y - text_height / 2 + .33)
+        self.background.blit(self.font.render(text, True, (0, 0, 0)), (x, y))
+
+        text = '{} vs {}'.format(*self.player_names)
+        text_width, text_height = self.font.size(text)
+        x, y = self.text_coords_below(chess.C1, vertical_offset = 0.70)
         x, y = (x, y - text_height / 2 + .33)
         self.background.blit(self.font.render(text, True, (0, 0, 0)), (x, y))
 
