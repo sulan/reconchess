@@ -5,6 +5,8 @@ import contextlib
 import chess
 from reconchess import GameHistory
 
+from typing import Optional
+
 # block output from pygame
 with contextlib.redirect_stdout(None):
     import pygame
@@ -81,7 +83,8 @@ class ReplayWindow:
     LIGHT_SQUARES = list(chess.SquareSet(chess.BB_LIGHT_SQUARES))
     DARK_SQUARES = list(chess.SquareSet(chess.BB_DARK_SQUARES))
 
-    def __init__(self, history: GameHistory):
+    def __init__(self, history: GameHistory,
+                 automatic_advance: Optional[int] = None):
         self.actions = []
         for turn in history.turns():
             if history.has_sense(turn):
@@ -106,6 +109,8 @@ class ReplayWindow:
                 })
 
         self.player_names = [history._white_name, history._black_name]
+        self.last_advance = pygame.time.get_ticks()
+        self.automatic_advance = automatic_advance
 
         self.board = chess.Board()
         self.action_index = None
@@ -183,6 +188,8 @@ class ReplayWindow:
         self.buttons[2].enabled = self.action_index < len(self.actions) - 1
         self.buttons[3].enabled = self.action_index < len(self.actions) - 1
 
+        self.last_advance = pygame.time.get_ticks()
+
     def go_backwards(self):
         if self.action_index == 0:
             self.action_index = None
@@ -229,6 +236,14 @@ class ReplayWindow:
 
         for btn in self.buttons:
             btn.update()
+
+        if self.automatic_advance is not None:
+            cur_time = pygame.time.get_ticks()
+            # Advance if the time is right and it's not the end
+            if (cur_time - self.last_advance > self.automatic_advance
+                    and (self.action_index is None
+                         or self.action_index < len(self.actions) - 1)):
+                self.go_forwards()
 
     def draw(self):
         self.background.fill((238, 238, 238))
@@ -316,6 +331,8 @@ class ReplayWindow:
 def main():
     parser = argparse.ArgumentParser(description='Allows you to watch a saved match.')
     parser.add_argument('history_path', help='Path to saved Game History file.')
+    parser.add_argument('--automatic_advance', type = int,
+                        help = 'Automatically advance the replay (interval given in milliseconds)')
     args = parser.parse_args()
 
     history = GameHistory.from_file(args.history_path)
@@ -323,7 +340,7 @@ def main():
         print('Game History is empty.')
         quit()
 
-    window = ReplayWindow(history)
+    window = ReplayWindow(history, args.automatic_advance)
 
     while True:
         window.update()
