@@ -305,6 +305,27 @@ def main():
     try:
         winner_color, win_reason, history = play_local_game(players[0], players[1], game)
         winner = 'Draw' if winner_color is None else chess.COLOR_NAMES[winner_color]
+
+        # Print the winner on the screen as well
+        font = pygame.font.SysFont(pygame.font.get_default_font(), 70)
+        # The string in `winner` starts with a capital letter.
+        text = 'Congrats, you win!' if winner[1:] == args.color[1:] else "Draw" if winner == 'Draw' else 'Sorry; next time?'
+        text_width, text_height = font.size(text)
+        background = player.window.background
+        x, y = background.get_size()
+        x, y = x//2, y//2
+        x, y = x - text_width / 2, y - text_height / 2
+        x = int(x)
+        y = int(y)
+        background.blit(font.render(text, True, (0, 0, 0)), (x, y))
+        player.window.screen.blit(background, (0, 0))
+        pygame.display.flip()
+        clock = pygame.time.Clock()
+        while True:
+            clock.tick(30)
+            can_quit = any(e.type == pygame.QUIT for e in pygame.event.get())
+            if can_quit:
+                break
     except:
         traceback.print_exc()
         game.end()
