@@ -240,10 +240,12 @@ class ReplayWindow:
         if self.automatic_advance is not None:
             cur_time = pygame.time.get_ticks()
             # Advance if the time is right and it's not the end
-            if (cur_time - self.last_advance > self.automatic_advance
-                    and (self.action_index is None
-                         or self.action_index < len(self.actions) - 1)):
-                self.go_forwards()
+            if cur_time - self.last_advance > self.automatic_advance:
+                if (self.action_index is None
+                     or self.action_index < len(self.actions) - 1):
+                    self.go_forwards()
+                else:
+                    quit()
 
     def draw(self):
         self.background.fill((238, 238, 238))
