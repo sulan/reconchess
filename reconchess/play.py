@@ -29,8 +29,14 @@ def play_local_game(white_player: Player, black_player: Player, game: LocalGame 
     black_name = black_player.__class__.__name__
     game.store_players(white_name, black_name)
 
-    white_player.handle_game_start(chess.WHITE, game.board.copy(), black_name)
-    black_player.handle_game_start(chess.BLACK, game.board.copy(), white_name)
+    if getattr(white_player, 'LEARNING_AGENT', False):
+        white_player.handle_game_start(chess.WHITE, game.board.copy(), black_name, game)
+    else:
+        white_player.handle_game_start(chess.WHITE, game.board.copy(), black_name)
+    if getattr(black_player, 'LEARNING_AGENT', False):
+        black_player.handle_game_start(chess.BLACK, game.board.copy(), white_name, game)
+    else:
+        black_player.handle_game_start(chess.BLACK, game.board.copy(), white_name)
     game.start()
 
     while not game.is_over():
