@@ -1,3 +1,5 @@
+__version__ = '1.6.7'
+
 from .game import Game, LocalGame, RemoteGame
 from .player import Player, load_player
 from .types import *
