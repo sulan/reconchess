@@ -39,8 +39,16 @@ def play_local_game(white_player: Player, black_player: Player, game: LocalGame 
         black_player.handle_game_start(chess.BLACK, game.board.copy(), white_name)
     game.start()
 
+    noop_count = 6
     while not game.is_over():
-        play_turn(game, players[game.turn], end_turn_last=True)
+        noop = not play_turn(game, players[game.turn], end_turn_last=True)
+        if noop:
+            noop_count -= 1
+            if noop_count <= 0:
+                print('RBC play: 6 noops in a row: resigning')
+                break
+        else:
+            noop_count = 6
 
     game.end()
     winner_color = game.get_winner_color()
@@ -92,7 +100,7 @@ def play_turn(game: Game, player: Player, end_turn_last=False):
 
     play_sense(game, player, sense_actions, move_actions)
 
-    play_move(game, player, move_actions, end_turn_last=end_turn_last)
+    return play_move(game, player, move_actions, end_turn_last=end_turn_last)
 
 
 def notify_opponent_move_results(game: Game, player: Player):
@@ -155,3 +163,5 @@ def play_move(game: Game, player: Player, move_actions: List[chess.Move], end_tu
 
     if end_turn_last:
         game.end_turn()
+
+    return requested_move is not None
